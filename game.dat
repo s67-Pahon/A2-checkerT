@@ -1,5 +1,21 @@
+int rows = 8;
+int cols = 8;
+int squaresize = 50;
 void setup() {
+  size(500, 400); 
+}
 
+void draw() {
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      if ((i + j) % 2 == 0) {
+        fill(240);  // White
+      } else {
+        fill(255,157,94);    // brown
+      }
+      rect(i * squaresize, j * squaresize, squaresize, squaresize);
+    }
+  }
 }
 
 void savegamedata() {
