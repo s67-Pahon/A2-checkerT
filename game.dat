@@ -1,6 +1,7 @@
 int rows = 8;
 int cols = 8;
 int squaresize = 50;
+int piecesize = 40;
 void setup() {
   size(500, 400); 
 }
@@ -21,7 +22,19 @@ void drawcheckerboard(){
     }
   }
 }
-void drawpieces(){
+void drawpieces(){ for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      if ((i + j) % 2 != 0) {  // Only place pieces on black squares
+        if (j < 2) {
+          fill(255, 0, 0);  // Red pieces for one player (top 3 rows)
+          ellipse(i * squaresize + squaresize / 2, j * squaresize + squaresize / 2, piecesize, piecesize);
+        } else if (j > 5) {
+          fill(0, 0, 0);  // Black pieces for the other player (bottom 3 rows)
+          ellipse(i * squaresize + squaresize / 2, j * squaresize + squaresize / 2, piecesize, piecesize);
+        }
+      }
+    }
+  }
 }
 void savegamedata() {
 
