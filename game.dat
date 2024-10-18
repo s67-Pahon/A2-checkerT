@@ -61,7 +61,7 @@ void drawpieces() {
   }
 }
 
-// Handle mouse click to select and move pieces
+// Handle mouse click to select and move pieces with restrictions
 void mousePressed() {
   int i = mouseX / squaresize;
   int j = mouseY / squaresize;
@@ -74,9 +74,9 @@ void mousePressed() {
       selectedX = i;
       selectedY = j;
     } 
-    // If a piece is selected, move it to the clicked spot
+    // If a piece is selected, check for valid move
     else if (pieceSelected) {
-      if (board[i][j] == 0) { // Only move to an empty square
+      if (board[i][j] == 0 && isValidMove(selectedX, selectedY, i, j)) { // Only move to an empty square if valid
         board[i][j] = board[selectedX][selectedY]; // Move the piece
         board[selectedX][selectedY] = 0;  // Empty the old spot
         pieceSelected = false;  // Deselect the piece
@@ -86,3 +86,24 @@ void mousePressed() {
     }
   }
 }
+
+// Check if the move is valid based on the rules
+boolean isValidMove(int startX, int startY, int endX, int endY) {
+  int piece = board[startX][startY];
+  int deltaX = abs(startX - endX);
+  int deltaY = endY - startY;
+
+  // Ensure the piece moves diagonally to an adjacent square (1 step)
+  if (deltaX == 1 && abs(deltaY) == 1) {
+    // Red pieces can only move downwards
+    if (piece == 1 && deltaY == 1) {
+      return true;
+    }
+    // Black pieces can only move upwards
+    if (piece == 2 && deltaY == -1) {
+      return true;
+    }
+  }
+  return false; // Invalid move
+}
+
