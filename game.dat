@@ -74,15 +74,22 @@ void mousePressed() {
       selectedX = i;
       selectedY = j;
     } 
-    // If a piece is selected, check for valid move or take
+    // If a piece is selected
     else if (pieceSelected) {
-      if (board[i][j] == 0 && (isValidMove(selectedX, selectedY, i, j) || canTake(selectedX, selectedY, i, j))) { 
+      // If the selected piece is clicked again, deselect it
+      if (i == selectedX && j == selectedY) {
+        pieceSelected = false;
+        selectedX = -1;
+        selectedY = -1;
+      }
+      // If a different square is clicked, check for valid move or take
+      else if (board[i][j] == 0 && (isValidMove(selectedX, selectedY, i, j) || canTake(selectedX, selectedY, i, j))) { 
         if (canTake(selectedX, selectedY, i, j)) {
           removeTakenPiece(selectedX, selectedY, i, j);  // Remove the opponent's piece if it's a taking move
         }
         board[i][j] = board[selectedX][selectedY]; // Move the piece
         board[selectedX][selectedY] = 0;  // Empty the old spot
-        pieceSelected = false;  // Deselect the piece
+        pieceSelected = false;  // Deselect the piece after moving
         selectedX = -1;
         selectedY = -1;
       }
