@@ -61,7 +61,7 @@ void drawpieces() {
   }
 }
 
-// Handle mouse click to select and move pieces with restrictions
+// Handle mouse click to select and move pieces with taking functionality
 void mousePressed() {
   int i = mouseX / squaresize;
   int j = mouseY / squaresize;
@@ -74,9 +74,12 @@ void mousePressed() {
       selectedX = i;
       selectedY = j;
     } 
-    // If a piece is selected, check for valid move
+    // If a piece is selected, check for valid move or take
     else if (pieceSelected) {
-      if (board[i][j] == 0 && isValidMove(selectedX, selectedY, i, j)) { // Only move to an empty square if valid
+      if (board[i][j] == 0 && (isValidMove(selectedX, selectedY, i, j) || canTake(selectedX, selectedY, i, j))) { 
+        if (canTake(selectedX, selectedY, i, j)) {
+          removeTakenPiece(selectedX, selectedY, i, j);  // Remove the opponent's piece if it's a taking move
+        }
         board[i][j] = board[selectedX][selectedY]; // Move the piece
         board[selectedX][selectedY] = 0;  // Empty the old spot
         pieceSelected = false;  // Deselect the piece
@@ -87,7 +90,7 @@ void mousePressed() {
   }
 }
 
-// Check if the move is valid based on the rules
+// Check if the move is valid (diagonal and adjacent)
 boolean isValidMove(int startX, int startY, int endX, int endY) {
   int piece = board[startX][startY];
   int deltaX = abs(startX - endX);
@@ -107,3 +110,33 @@ boolean isValidMove(int startX, int startY, int endX, int endY) {
   return false; // Invalid move
 }
 
+// Check if the piece can take an opponent's piece
+boolean canTake(int startX, int startY, int endX, int endY) {
+  int piece = board[startX][startY];
+  int deltaX = abs(startX - endX);
+  int deltaY = endY - startY;
+
+  // Ensure the piece jumps diagonally (2 steps)
+  if (deltaX == 2 && abs(deltaY) == 2) {
+    int middleX = (startX + endX) / 2;
+    int middleY = (startY + endY) / 2;
+    int middlePiece = board[middleX][middleY];
+
+    // Red pieces can only take black pieces by moving downward
+    if (piece == 1 && deltaY == 2 && middlePiece == 2) {
+      return true;
+    }
+    // Black pieces can only take red pieces by moving upward
+    if (piece == 2 && deltaY == -2 && middlePiece == 1) {
+      return true;
+    }
+  }
+  return false; // Invalid take
+}
+
+// Remove the piece that was jumped over
+void removeTakenPiece(int startX, int startY, int endX, int endY) {
+  int middleX = (startX + endX) / 2;
+  int middleY = (startY + endY) / 2;
+  board[middleX][middleY] = 0;  // Remove the opponent's piece
+}
