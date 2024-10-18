@@ -1,41 +1,88 @@
 int rows = 8;
 int cols = 8;
-int squaresize = 50;
-int piecesize = 40;
+int squaresize = 75;
+int piecesize = 45;
+boolean pieceSelected = false;
+int selectedX = -1, selectedY = -1;
+
+int[][] board = new int[rows][cols]; // 1 = red, 2 = black, 0 = empty
+
 void setup() {
-  size(500, 400); 
+  size(700, 600);
+  initializeBoard();
 }
 
 void draw() {
   drawcheckerboard();
   drawpieces();
 }
-void drawcheckerboard(){
-  for (int i = 0; i < rows; i++) {
-    for (int j = 0; j < cols; j++) {
-      if ((i + j) % 2 == 0) {
-        fill(240);  // White
-      } else {
-        fill(255,157,94);    // brown
-      }
-      rect(i * squaresize, j * squaresize, squaresize, squaresize);
-    }
-  }
-}
-void drawpieces(){ for (int i = 0; i < rows; i++) {
-    for (int j = 0; j < cols; j++) {
-      if ((i + j) % 2 != 0) {  // Only place pieces on black squares
+
+// Initialize the board with pieces in the starting positions
+void initializeBoard() {
+  for (int j = 0; j < rows; j++) {
+    for (int i = 0; i < cols; i++) {
+      if ((i + j) % 2 != 0) {
         if (j < 2) {
-          fill(255, 0, 0);  // Red pieces for one player top 2 rows
-          ellipse(i * squaresize + squaresize / 2, j * squaresize + squaresize / 2, piecesize, piecesize);
+          board[i][j] = 1; // Red piece
         } else if (j > 5) {
-          fill(0, 0, 0);  // Black pieces for the other player bottom 2 rows
-          ellipse(i * squaresize + squaresize / 2, j * squaresize + squaresize / 2, piecesize, piecesize);
+          board[i][j] = 2; // Black piece
         }
       }
     }
   }
 }
-void savegamedata() {
 
+// Draw the checkerboard
+void drawcheckerboard() {
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      if ((i + j) % 2 == 0) {
+        fill(240);  // White
+      } else {
+        fill(255, 157, 94);  // Brown
+      }
+      rect(i * squaresize, j * squaresize, squaresize, squaresize);
+    }
+  }
+}
+
+// Draw the pieces on the board
+void drawpieces() {
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      if (board[i][j] == 1) {
+        fill(255, 0, 0);  // Red piece
+        ellipse(i * squaresize + squaresize / 2, j * squaresize + squaresize / 2, piecesize, piecesize);
+      } else if (board[i][j] == 2) {
+        fill(0, 0, 0);  // Black piece
+        ellipse(i * squaresize + squaresize / 2, j * squaresize + squaresize / 2, piecesize, piecesize);
+      }
+    }
+  }
+}
+
+// Handle mouse click to select and move pieces
+void mousePressed() {
+  int i = mouseX / squaresize;
+  int j = mouseY / squaresize;
+
+  // Ensure the click is within the bounds of the board
+  if (i >= 0 && i < rows && j >= 0 && j < cols) {
+    // If no piece is selected, check if a piece is clicked
+    if (!pieceSelected && board[i][j] != 0) {
+      pieceSelected = true;
+      selectedX = i;
+      selectedY = j;
+    } 
+    // If a piece is selected, move it to the clicked spot
+    else if (pieceSelected) {
+      if (board[i][j] == 0) { // Only move to an empty square
+        board[i][j] = board[selectedX][selectedY]; // Move the piece
+        board[selectedX][selectedY] = 0;  // Empty the old spot
+        pieceSelected = false;  // Deselect the piece
+        selectedX = -1;
+        selectedY = -1;
+      }
+    }
+  }
 }
