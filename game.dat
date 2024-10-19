@@ -4,18 +4,20 @@ int squaresize = 75;
 int piecesize = 45;
 boolean pieceSelected = false;
 int selectedX = -1, selectedY = -1;
+int currentTurn = 2; // 1 for red, 2 for black
 
 int[][] board = new int[rows][cols]; // 1 = red, 2 = black, 3 = red king, 4 = black king
 boolean[][] highlightMoves = new boolean[rows][cols]; // Tracks squares to highlight
 
 void setup() {
-  size(700, 600);
+  size(600, 700); 
   initializeBoard();
 }
 
 void draw() {
   drawcheckerboard();
   drawpieces();
+  drawTurnIndicator(); // Show whose turn it is in the bottom gray area
 }
 
 // Initialize the board with pieces in the starting positions
@@ -30,6 +32,23 @@ void initializeBoard() {
         }
       }
     }
+  }
+}
+
+// Draw the turn indicator at the bottom of the board in the gray area
+void drawTurnIndicator() {
+  fill(200); // Gray background for the turn indicator area
+  rect(0, 600, 700, 100); // Draw the gray area below the board
+  
+  fill(0); // Text color
+  textSize(24);
+  
+  if (currentTurn == 1) {
+    fill(255, 0, 0); // Red's turn
+    text("Red's Turn", width / 2 - 50, 650); // Center the text in the gray area
+  } else {
+    fill(0, 0, 0); // Black's turn
+    text("Black's Turn", width / 2 - 60, 650); // Center the text in the gray area
   }
 }
 
@@ -92,7 +111,7 @@ void mousePressed() {
   // Ensure the click is within the bounds of the board
   if (i >= 0 && i < rows && j >= 0 && j < cols) {
     // If no piece is selected, check if a piece is clicked
-    if (!pieceSelected && board[i][j] != 0) {
+    if (!pieceSelected && board[i][j] != 0 && isCurrentPlayerPiece(i, j)) {
       pieceSelected = true;
       selectedX = i;
       selectedY = j;
@@ -119,6 +138,7 @@ void mousePressed() {
         selectedY = -1;
         clearHighlights(); // Clear move highlights after move
         checkKing(i, j);  // Check if the piece should be crowned king
+        switchTurn();  // Switch to the other player's turn
       }
     }
   }
@@ -215,4 +235,15 @@ void checkKing(int i, int j) {
   } else if (j == rows - 1 && board[i][j] == 1) {
     board[i][j] = 3;  // Red becomes a king
   }
+}
+
+// Check if the piece belongs to the current player
+boolean isCurrentPlayerPiece(int i, int j) {
+  int piece = board[i][j];
+  return (currentTurn == 1 && (piece == 1 || piece == 3)) || (currentTurn == 2 && (piece == 2 || piece == 4));
+}
+
+// Switch to the other player's turn
+void switchTurn() {
+  currentTurn = (currentTurn == 1) ? 2 : 1;
 }
