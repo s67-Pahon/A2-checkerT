@@ -7,6 +7,7 @@ int selectedX = -1, selectedY = -1;
 
 int[][] board = new int[rows][cols]; // 1 = red, 2 = black, 0 = empty
 boolean[][] highlightMoves = new boolean[rows][cols]; // Tracks squares to highlight
+
 void setup() {
   size(700, 600);
   initializeBoard();
@@ -32,11 +33,14 @@ void initializeBoard() {
   }
 }
 
-// Draw the checkerboard
+// Draw the checkerboard with highlighted available moves
+// Draw the checkerboard with highlighted available moves
 void drawcheckerboard() {
+  stroke(0);  // Set default stroke for the checkerboard squares (black border)
+  strokeWeight(1);  // Standard thin border
   for (int i = 0; i < rows; i++) {
     for (int j = 0; j < cols; j++) {
-        if (highlightMoves[i][j]) {
+      if (highlightMoves[i][j]) {
         fill(100, 255, 100);  // Highlight valid moves (light green)
       } else if ((i + j) % 2 == 0) {
         fill(240);  // White
@@ -48,20 +52,32 @@ void drawcheckerboard() {
   }
 }
 
-// Draw the pieces on the board
+// Draw the pieces on the board and highlight the selected piece
 void drawpieces() {
   for (int i = 0; i < rows; i++) {
     for (int j = 0; j < cols; j++) {
-      if (board[i][j] == 1) {
-        fill(255, 0, 0);  // Red piece
-        ellipse(i * squaresize + squaresize / 2, j * squaresize + squaresize / 2, piecesize, piecesize);
-      } else if (board[i][j] == 2) {
-        fill(0, 0, 0);  // Black piece
+      if (board[i][j] != 0) {
+        // Check if this piece is the selected one
+        if (pieceSelected && i == selectedX && j == selectedY) {
+          stroke(0, 255, 0);  // Add a green border for the selected piece
+          strokeWeight(4);  // Thicker border
+        } else {
+          noStroke();  // No border for other pieces
+        }
+
+        // Draw the red or black piece
+        if (board[i][j] == 1) {
+          fill(255, 0, 0);  // Red piece
+        } else if (board[i][j] == 2) {
+          fill(0, 0, 0);  // Black piece
+        }
         ellipse(i * squaresize + squaresize / 2, j * squaresize + squaresize / 2, piecesize, piecesize);
       }
     }
   }
+  noStroke();  // Reset stroke for other drawings
 }
+
 
 // Handle mouse click to select and move pieces with taking functionality
 void mousePressed() {
