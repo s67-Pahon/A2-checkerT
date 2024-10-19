@@ -34,7 +34,6 @@ void initializeBoard() {
 }
 
 // Draw the checkerboard with highlighted available moves
-// Draw the checkerboard with highlighted available moves
 void drawcheckerboard() {
   stroke(0);  // Set default stroke for the checkerboard squares (black border)
   strokeWeight(1);  // Standard thin border
@@ -62,7 +61,8 @@ void drawpieces() {
           stroke(0, 255, 0);  // Add a green border for the selected piece
           strokeWeight(4);  // Thicker border
         } else {
-          noStroke();  // No border for other pieces
+          stroke(0, 0, 0);  // Black border
+          strokeWeight(1); // Thin border
         }
 
         // Draw the red or black piece
