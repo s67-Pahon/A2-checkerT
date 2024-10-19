@@ -6,6 +6,7 @@ boolean pieceSelected = false;
 int selectedX = -1, selectedY = -1;
 int currentTurn = 2; // 1 for red, 2 for black
 boolean gameOver = false; // Track if the game is over
+boolean saveButtonHovered = false; // Track if the save button is hovered
 
 int[][] board = new int[rows][cols]; // 1 = red, 2 = black, 3 = red king, 4 = black king
 boolean[][] highlightMoves = new boolean[rows][cols]; // Tracks squares to highlight
@@ -18,7 +19,8 @@ void setup() {
 void draw() {
   drawcheckerboard();
   drawpieces();
-  drawTurnIndicator(); // Show whose turn it is in the bottom gray area
+  drawSaveButton();  // Draw the save button first
+  drawTurnIndicator(); // Then draw the turn indicator
   if (gameOver) {
     displayWinner(); // Display the winner if the game is over
   }
@@ -39,15 +41,25 @@ void initializeBoard() {
   }
 }
 
+// Draw the save button in the gray area
+void drawSaveButton() {
+  fill(200); // Gray background for the save button area
+  rect(0, 600, 600, 100); // Draw the gray area below the board
+  
+  // Simple square button for saving
+  fill(255); // Button color
+  rect(450, 630, 100, 40); // Save button dimensions
+  fill(0); // Button text color
+  textSize(20);
+  text("Save", 475, 655); // Text on the button
+}
+
 // Draw the turn indicator at the bottom of the board in the gray area
 void drawTurnIndicator() {
-  fill(200); // Gray background for the turn indicator area
-  rect(0, 600, 700, 100); // Draw the gray area below the board
+  fill(0); // Text color
+  textSize(24);
   
   if (!gameOver) {
-    fill(0); // Text color
-    textSize(24);
-  
     if (currentTurn == 1) {
       fill(255, 0, 0); // Red's turn
       text("Red's Turn", width / 2 - 50, 650); // Center the text in the gray area
@@ -130,6 +142,12 @@ void mousePressed() {
   int i = mouseX / squaresize;
   int j = mouseY / squaresize;
 
+  // Check if the save button is clicked
+  if (mouseX > 450 && mouseX < 550 && mouseY > 630 && mouseY < 670) {
+    saveGame(); // Save the game if the button is clicked
+    return;
+  }
+
   // Ensure the click is within the bounds of the board
   if (i >= 0 && i < rows && j >= 0 && j < cols) {
     // If no piece is selected, check if a piece is clicked
@@ -168,6 +186,20 @@ void mousePressed() {
       }
     }
   }
+}
+
+// Save the current game state to a file
+void saveGame() {
+  PrintWriter output = createWriter("checkers_save.txt");
+  output.println(currentTurn); // Save the current turn
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      output.print(board[i][j] + " "); // Save the board
+    }
+    output.println();
+  }
+  output.flush();
+  output.close();
 }
 
 // Highlight valid moves for the selected piece
@@ -289,3 +321,4 @@ boolean checkWinCondition() {
   }
   return redCount == 0 || blackCount == 0; // True if one side has no pieces left
 }
+
