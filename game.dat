@@ -6,7 +6,7 @@ boolean pieceSelected = false;
 int selectedX = -1, selectedY = -1;
 
 int[][] board = new int[rows][cols]; // 1 = red, 2 = black, 0 = empty
-
+boolean[][] highlightMoves = new boolean[rows][cols]; // Tracks squares to highlight
 void setup() {
   size(700, 600);
   initializeBoard();
@@ -36,7 +36,9 @@ void initializeBoard() {
 void drawcheckerboard() {
   for (int i = 0; i < rows; i++) {
     for (int j = 0; j < cols; j++) {
-      if ((i + j) % 2 == 0) {
+        if (highlightMoves[i][j]) {
+        fill(100, 255, 100);  // Highlight valid moves (light green)
+      } else if ((i + j) % 2 == 0) {
         fill(240);  // White
       } else {
         fill(255, 157, 94);  // Brown
@@ -73,6 +75,7 @@ void mousePressed() {
       pieceSelected = true;
       selectedX = i;
       selectedY = j;
+      highlightValidMoves(i, j); // Highlight available moves for selected piece
     } 
     // If a piece is selected
     else if (pieceSelected) {
@@ -81,6 +84,7 @@ void mousePressed() {
         pieceSelected = false;
         selectedX = -1;
         selectedY = -1;
+        clearHighlights(); // Clear move highlights
       }
       // If a different square is clicked, check for valid move or take
       else if (board[i][j] == 0 && (isValidMove(selectedX, selectedY, i, j) || canTake(selectedX, selectedY, i, j))) { 
@@ -92,7 +96,31 @@ void mousePressed() {
         pieceSelected = false;  // Deselect the piece after moving
         selectedX = -1;
         selectedY = -1;
+        clearHighlights(); // Clear move highlights after move
       }
+    }
+  }
+}
+
+// Highlight valid moves for the selected piece
+void highlightValidMoves(int startX, int startY) {
+  clearHighlights(); // Clear any previous highlights
+
+  // Loop through all possible moves on the board
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      if (board[i][j] == 0 && (isValidMove(startX, startY, i, j) || canTake(startX, startY, i, j))) {
+        highlightMoves[i][j] = true; // Highlight this square as a valid move
+      }
+    }
+  }
+}
+
+// Clear all highlighted moves
+void clearHighlights() {
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      highlightMoves[i][j] = false;
     }
   }
 }
