@@ -289,8 +289,3 @@ boolean checkWinCondition() {
   }
   return redCount == 0 || blackCount == 0; // True if one side has no pieces left
 }
-
-// Switch to the other player's turn
-void switchTurn() {
-  currentTurn = (currentTurn == 1) ? 2 : 1;
-}
