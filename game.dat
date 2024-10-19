@@ -5,7 +5,7 @@ int piecesize = 45;
 boolean pieceSelected = false;
 int selectedX = -1, selectedY = -1;
 
-int[][] board = new int[rows][cols]; // 1 = red, 2 = black, 0 = empty
+int[][] board = new int[rows][cols]; // 1 = red, 2 = black, 3 = red king, 4 = black king
 boolean[][] highlightMoves = new boolean[rows][cols]; // Tracks squares to highlight
 
 void setup() {
@@ -65,19 +65,24 @@ void drawpieces() {
           strokeWeight(1); // Thin border
         }
 
-        // Draw the red or black piece
-        if (board[i][j] == 1) {
-          fill(255, 0, 0);  // Red piece
-        } else if (board[i][j] == 2) {
-          fill(0, 0, 0);  // Black piece
+        // Draw the piece (red, black, or king)
+        if (board[i][j] == 1 || board[i][j] == 3) {
+          fill(255, 0, 0);  // Red piece or red king
+        } else if (board[i][j] == 2 || board[i][j] == 4) {
+          fill(0, 0, 0);  // Black piece or black king
         }
         ellipse(i * squaresize + squaresize / 2, j * squaresize + squaresize / 2, piecesize, piecesize);
+
+        // Add a smaller circle for king pieces
+        if (board[i][j] == 3 || board[i][j] == 4) {
+          fill(255, 255, 255);  // White crown for kings
+          ellipse(i * squaresize + squaresize / 2, j * squaresize + squaresize / 2, piecesize / 2, piecesize / 2);
+        }
       }
     }
   }
   noStroke();  // Reset stroke for other drawings
 }
-
 
 // Handle mouse click to select and move pieces with taking functionality
 void mousePressed() {
@@ -113,6 +118,7 @@ void mousePressed() {
         selectedX = -1;
         selectedY = -1;
         clearHighlights(); // Clear move highlights after move
+        checkKing(i, j);  // Check if the piece should be crowned king
       }
     }
   }
@@ -147,15 +153,21 @@ boolean isValidMove(int startX, int startY, int endX, int endY) {
   int deltaX = abs(startX - endX);
   int deltaY = endY - startY;
 
-  // Ensure the piece moves diagonally to an adjacent square (1 step)
-  if (deltaX == 1 && abs(deltaY) == 1) {
-    // Red pieces can only move downwards
-    if (piece == 1 && deltaY == 1) {
+  // Kings can move both ways; normal pieces can only move one way
+  if (piece == 3 || piece == 4) {  // King piece can move forward or backward
+    if (deltaX == 1 && abs(deltaY) == 1) {
       return true;
     }
-    // Black pieces can only move upwards
-    if (piece == 2 && deltaY == -1) {
-      return true;
+  } else {  // Regular pieces can only move in one direction
+    if (deltaX == 1 && abs(deltaY) == 1) {
+      // Red pieces can only move downwards
+      if (piece == 1 && deltaY == 1) {
+        return true;
+      }
+      // Black pieces can only move upwards
+      if (piece == 2 && deltaY == -1) {
+        return true;
+      }
     }
   }
   return false; // Invalid move
@@ -173,13 +185,17 @@ boolean canTake(int startX, int startY, int endX, int endY) {
     int middleY = (startY + endY) / 2;
     int middlePiece = board[middleX][middleY];
 
-    // Red pieces can only take black pieces by moving downward
-    if (piece == 1 && deltaY == 2 && middlePiece == 2) {
+    // Regular pieces and kings can take based on rules
+    if (piece == 1 && deltaY == 2 && (middlePiece == 2 || middlePiece == 4)) {  // Red takes black
       return true;
     }
-    // Black pieces can only take red pieces by moving upward
-    if (piece == 2 && deltaY == -2 && middlePiece == 1) {
+    if (piece == 2 && deltaY == -2 && (middlePiece == 1 || middlePiece == 3)) {  // Black takes red
       return true;
+    }
+    if (piece == 3 || piece == 4) {  // Kings can take both ways
+      if (middlePiece == 1 || middlePiece == 2 || middlePiece == 3 || middlePiece == 4) {
+        return true;
+      }
     }
   }
   return false; // Invalid take
@@ -190,4 +206,13 @@ void removeTakenPiece(int startX, int startY, int endX, int endY) {
   int middleX = (startX + endX) / 2;
   int middleY = (startY + endY) / 2;
   board[middleX][middleY] = 0;  // Remove the opponent's piece
+}
+
+// Check if a piece has reached the opposite end to become a king
+void checkKing(int i, int j) {
+  if (j == 0 && board[i][j] == 2) {
+    board[i][j] = 4;  // Black becomes a king
+  } else if (j == rows - 1 && board[i][j] == 1) {
+    board[i][j] = 3;  // Red becomes a king
+  }
 }
