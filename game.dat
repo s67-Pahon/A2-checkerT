@@ -5,6 +5,7 @@ int piecesize = 45;
 boolean pieceSelected = false;
 int selectedX = -1, selectedY = -1;
 int currentTurn = 2; // 1 for red, 2 for black
+boolean gameOver = false; // Track if the game is over
 
 int[][] board = new int[rows][cols]; // 1 = red, 2 = black, 3 = red king, 4 = black king
 boolean[][] highlightMoves = new boolean[rows][cols]; // Tracks squares to highlight
@@ -18,6 +19,9 @@ void draw() {
   drawcheckerboard();
   drawpieces();
   drawTurnIndicator(); // Show whose turn it is in the bottom gray area
+  if (gameOver) {
+    displayWinner(); // Display the winner if the game is over
+  }
 }
 
 // Initialize the board with pieces in the starting positions
@@ -40,15 +44,31 @@ void drawTurnIndicator() {
   fill(200); // Gray background for the turn indicator area
   rect(0, 600, 700, 100); // Draw the gray area below the board
   
-  fill(0); // Text color
-  textSize(24);
+  if (!gameOver) {
+    fill(0); // Text color
+    textSize(24);
   
-  if (currentTurn == 1) {
-    fill(255, 0, 0); // Red's turn
-    text("Red's Turn", width / 2 - 50, 650); // Center the text in the gray area
+    if (currentTurn == 1) {
+      fill(255, 0, 0); // Red's turn
+      text("Red's Turn", width / 2 - 50, 650); // Center the text in the gray area
+    } else {
+      fill(0, 0, 0); // Black's turn
+      text("Black's Turn", width / 2 - 60, 650); // Center the text in the gray area
+    }
+  }
+}
+
+// Display the winner
+void displayWinner() {
+  fill(0);
+  textSize(36);
+  textAlign(CENTER);
+  if (currentTurn == 2) {
+    fill(0, 0, 0); // Black wins
+    text("Black Wins!", width / 2, 650);
   } else {
-    fill(0, 0, 0); // Black's turn
-    text("Black's Turn", width / 2 - 60, 650); // Center the text in the gray area
+    fill(255, 0, 0); // Red wins
+    text("Red Wins!", width / 2, 650);
   }
 }
 
@@ -105,6 +125,8 @@ void drawpieces() {
 
 // Handle mouse click to select and move pieces with taking functionality
 void mousePressed() {
+  if (gameOver) return; // Prevent further moves if the game is over
+
   int i = mouseX / squaresize;
   int j = mouseY / squaresize;
 
@@ -138,7 +160,11 @@ void mousePressed() {
         selectedY = -1;
         clearHighlights(); // Clear move highlights after move
         checkKing(i, j);  // Check if the piece should be crowned king
-        switchTurn();  // Switch to the other player's turn
+        if (checkWinCondition()) {
+          gameOver = true;  // Set game over if a player wins
+        } else {
+          switchTurn();  // Switch to the other player's turn
+        }
       }
     }
   }
@@ -241,6 +267,27 @@ void checkKing(int i, int j) {
 boolean isCurrentPlayerPiece(int i, int j) {
   int piece = board[i][j];
   return (currentTurn == 1 && (piece == 1 || piece == 3)) || (currentTurn == 2 && (piece == 2 || piece == 4));
+}
+
+// Switch to the other player's turn
+void switchTurn() {
+  currentTurn = (currentTurn == 1) ? 2 : 1;
+}
+
+// Check if a player has won by eliminating all opponent pieces
+boolean checkWinCondition() {
+  int redCount = 0;
+  int blackCount = 0;
+  for (int i = 0; i < rows; i++) {
+    for (int j = 0; j < cols; j++) {
+      if (board[i][j] == 1 || board[i][j] == 3) {
+        redCount++;
+      } else if (board[i][j] == 2 || board[i][j] == 4) {
+        blackCount++;
+      }
+    }
+  }
+  return redCount == 0 || blackCount == 0; // True if one side has no pieces left
 }
 
 // Switch to the other player's turn
